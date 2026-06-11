@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 200" width="500" height="200">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="30%" stop-color="#FFF8DC"/>
+      <stop offset="50%" stop-color="#DAA520"/>
+      <stop offset="80%" stop-color="#B8860B"/>
+      <stop offset="100%" stop-color="#FFD700"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="500" height="200" rx="20" fill="#0D0D0D"/>
+  <line x1="20" y1="40" x2="80" y2="40" stroke="url(#gold)" stroke-width="2" filter="url(#glow)"/>
+  <line x1="420" y1="40" x2="480" y2="40" stroke="url(#gold)" stroke-width="2" filter="url(#glow)"/>
+  <line x1="20" y1="160" x2="80" y2="160" stroke="url(#gold)" stroke-width="2" filter="url(#glow)"/>
+  <line x1="420" y1="160" x2="480" y2="160" stroke="url(#gold)" stroke-width="2" filter="url(#glow)"/>
+  <text x="120" y="125" font-family="'Times New Roman', Georgia" font-size="90" font-weight="bold" fill="url(#gold)" filter="url(#glow)">N</text>
+  <text x="195" y="125" font-family="'Times New Roman', Georgia" font-size="90" font-weight="bold" fill="#E8E8E8" filter="url(#glow)">o</text>
+  <text x="260" y="125" font-family="'Times New Roman', Georgia" font-size="90" font-weight="bold" fill="url(#gold)" filter="url(#glow)">v</text>
+  <text x="325" y="125" font-family="'Times New Roman', Georgia" font-size="90" font-weight="bold" fill="#E8E8E8" filter="url(#glow)">a</text>
+  <rect x="100" y="145" width="300" height="3" rx="1.5" fill="url(#gold)" filter="url(#glow)"/>
+  <text x="250" y="175" font-family="Arial" font-size="12" fill="#DAA520" text-anchor="middle" letter-spacing="4" filter="url(#glow)">LUXURY</text>
+</svg>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOVA | المتجر - مع الطلبات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Cairo',sans-serif;background:#0A0A0A;color:#F5F5F5}
+        .logo-3d{text-align:center;padding:30px 0 10px;margin-top:70px}
+        .logo-3d svg{width:320px;height:auto;filter:drop-shadow(0 0 25px rgba(218,165,32,0.6));transition:transform .4s}
+        .logo-3d svg:hover{transform:scale(1.05)}
+        .navbar{background:rgba(0,0,0,0.95);padding:15px 50px;display:flex;justify-content:space-between;align-items:center;position:fixed;width:100%;top:0;z-index:1000;border-bottom:1px solid #DAA520}
+        .nav-links{display:flex;gap:30px;flex-wrap:wrap}
+        .nav-links a{color:#F5F5F5;text-decoration:none;font-size:18px;font-weight:600;cursor:pointer}
+        .nav-links a:hover{color:#DAA520}
+        .nav-icons button{background:#DAA520;border:none;padding:8px 15px;border-radius:25px;cursor:pointer;font-size:16px;font-weight:bold}
+        .section-title{text-align:center;margin:40px 0 20px}
+        .section-title h2{font-size:42px;font-weight:700;display:inline-flex;align-items:center;gap:15px;background:linear-gradient(135deg,#DAA520,#FFD700);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:30px;max-width:1200px;margin:0 auto 60px;padding:0 20px}
+        .product-card{background:#111;border-radius:15px;overflow:hidden;border:1px solid #222;cursor:pointer;transition:.3s}
+        .product-card:hover{transform:translateY(-10px);border-color:#DAA520}
+        .product-card img{width:100%;height:250px;object-fit:cover}
+        .product-card h3{padding:15px 15px 5px}
+        .product-card .price{color:#DAA520;font-size:20px;font-weight:bold;padding:0 15px}
+        .product-card button{background:#DAA520;border:none;padding:10px;width:calc(100% - 30px);margin:15px;border-radius:25px;cursor:pointer;font-weight:bold}
+        .product-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.96);z-index:2000;justify-content:center;align-items:center}
+        .product-modal-content{background:#111;max-width:500px;width:90%;border-radius:20px;padding:25px;border:1px solid #DAA520;position:relative}
+        .close-modal{position:absolute;top:15px;right:20px;font-size:28px;cursor:pointer;color:#DAA520;background:none;border:none}
+        .product-modal-img{width:100%;height:280px;object-fit:cover;border-radius:15px}
+        .color-options,.size-options{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+        .color-btn,.size-btn{padding:8px 18px;background:#1A1A1A;border:1px solid #333;border-radius:8px;cursor:pointer;color:white}
+        .color-btn.selected,.size-btn.selected{background:#DAA520;color:#0A0A0A}
+        .quantity-control{display:flex;align-items:center;gap:15px;margin:15px 0}
+        .quantity-control button{width:40px;height:40px;background:#DAA520;border:none;border-radius:8px;cursor:pointer;font-size:20px}
+        .add-to-cart-modal{width:100%;padding:12px;background:#DAA520;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:15px}
+        .modal,.order-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:1001;justify-content:center;align-items:center}
+        .modal-content,.order-content{background:#111;max-width:500px;width:90%;border-radius:20px;padding:25px;border:1px solid #DAA520}
+        .cart-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #222}
+        .cart-total{text-align:center;font-size:20px;font-weight:bold;margin:20px 0;color:#DAA520}
+        .order-content input,.order-content select,.order-content textarea{width:100%;padding:12px;margin:10px 0;background:#1A1A1A;border:1px solid #333;border-radius:8px;color:white}
+        .success-message{position:fixed;bottom:30px;right:30px;background:#00B894;color:white;padding:15px 25px;border-radius:10px;z-index:2001;animation:fadeOut 3s forwards}
+        @keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0;visibility:hidden}}
+        .footer{background:#050505;padding:30px;text-align:center;border-top:1px solid #DAA520;margin-top:50px;color:#888}
+        .empty-msg{text-align:center;padding:80px;color:#888}
+        .custom-section{max-width:800px;margin:60px auto;padding:0 20px}
+        .custom-card{background:#111;border-radius:30px;padding:40px;border:1px solid #DAA520;text-align:center}
+        .custom-card h3{color:#DAA520;font-size:28px;margin-bottom:15px}
+        .custom-card p{color:#888;margin-bottom:30px}
+        .custom-form{display:flex;flex-direction:column;gap:20px}
+        .custom-form input,.custom-form select,.custom-form textarea{padding:15px;background:#1A1A1A;border:1px solid #333;border-radius:12px;color:white;font-size:16px}
+        .custom-form input[type="file"]{padding:10px;background:#1A1A1A}
+        .custom-form button{background:#DAA520;border:none;padding:15px;border-radius:12px;font-weight:bold;font-size:18px;cursor:pointer;transition:.3s}
+        .custom-form button:hover{background:#FFD700}
+        .preview-img{max-width:150px;margin-top:10px;border-radius:10px;display:none}
+        .reviews-section{max-width:1200px;margin:80px auto;padding:0 20px}
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-links">
+        <a onclick="showSection('clothes')">ملابس</a>
+        <a onclick="showSection('mugs')">فناجين</a>
+        <a onclick="showSection('custom')">طلب مخصص</a>
+        <a onclick="showSection('offers')">عروض</a>
+    </div>
+    <div class="nav-icons">
+        <button onclick="openCart()">🛒 <span id="cartCount">0</span></button>
+    </div>
+</nav>
+
+<div class="logo-3d">
+    <svg viewBox="0 0 500 180" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFD700"/><stop offset="30%" stop-color="#FFF8DC"/><stop offset="50%" stop-color="#DAA520"/><stop offset="80%" stop-color="#B8860B"/><stop offset="100%" stop-color="#FFD700"/></linearGradient>
+            <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect width="500" height="180" rx="15" fill="#0D0D0D"/>
+        <text x="250" y="115" font-family="'Times New Roman', Georgia" font-size="90" font-weight="bold" fill="#DAA520" text-anchor="middle" filter="url(#glow)">NOVA</text>
+        <rect x="150" y="135" width="200" height="3" rx="1.5" fill="#DAA520" filter="url(#glow)"/>
+        <text x="250" y="160" font-family="Arial" font-size="12" fill="#DAA520" text-anchor="middle" letter-spacing="4">LUXURY</text>
+    </svg>
+</div>
+
+<div id="clothesSection">
+    <div class="section-title"><h2>👔 ملابس 👔</h2></div>
+    <div class="products-grid" id="clothesGrid"></div>
+</div>
+
+<div id="mugsSection" style="display:none">
+    <div class="section-title"><h2>☕ فناجين ☕</h2></div>
+    <div class="products-grid" id="mugsGrid"></div>
+</div>
+
+<div id="customSection" style="display:none">
+    <div class="custom-section">
+        <div class="custom-card">
+            <h3>🎨 صمم منتجك بنفسك</h3>
+            <p>ارفع صورتك أو تصميمك، وسنطبعه على المنتج الذي تختاره</p>
+            <form id="customForm" class="custom-form" onsubmit="submitCustomOrder(event)">
+                <select id="customProductType" required>
+                    <option value="">اختر نوع المنتج</option>
+                    <option value="قميص">👕 قميص - 35$</option>
+                    <option value="فنجان">☕ فنجان - 15$</option>
+                    <option value="هودي">🧥 هودي - 55$</option>
+                    <option value="تيشرت">👚 تيشرت - 25$</option>
+                </select>
+                <input type="file" id="customImage" accept="image/*" required onchange="previewImage(event)">
+                <img id="imagePreview" class="preview-img" alt="معاينة الصورة">
+                <input type="text" id="customName" placeholder="اسمك الكامل" required>
+                <input type="tel" id="customPhone" placeholder="رقم هاتفك" required>
+                <input type="text" id="customCity" placeholder="اكتب محافظتك" required>
+                <textarea id="customNotes" rows="3" placeholder="ملاحظات إضافية (ألوان، حجم، تفاصيل...)"></textarea>
+                <button type="submit">📩 إرسال الطلب المخصص</button>
+            </form>
+            <div id="customMessage" style="margin-top:20px;color:#DAA520"></div>
+        </div>
+    </div>
+</div>
+
+<div id="offersSection" style="display:none">
+    <div class="section-title"><h2>🎁 عروض 🎁</h2></div>
+    <div class="empty-msg">سيتم إضافة العروض قريباً</div>
+</div>
+
+<div id="productModal" class="product-modal">
+    <div class="product-modal-content">
+        <button class="close-modal" onclick="closeProductModal()">✕</button>
+        <img id="modalImg" class="product-modal-img" src="">
+        <h3 id="modalName" style="margin-top:15px"></h3>
+        <div id="modalPrice" style="color:#DAA520; font-size:22px; margin:10px 0"></div>
+        <div><label>🎨 الألوان:</label><div id="colorOptions" class="color-options"></div></div>
+        <div id="sizeGroup"><label>📏 المقاسات:</label><div id="sizeOptions" class="size-options"></div></div>
+        <div class="quantity-control"><button onclick="changeQuantity(-1)">-</button><span id="quantityValue">1</span><button onclick="changeQuantity(1)">+</button></div>
+        <button class="add-to-cart-modal" onclick="addToCartFromModal()">➕ إضافة للسلة</button>
+    </div>
+</div>
+
+<div id="cartModal" class="modal">
+    <div class="modal-content">
+        <button class="close-modal" onclick="closeCart()" style="float:right">✕</button>
+        <h2>🛒 سلة التسوق</h2>
+        <div id="cartItems"></div>
+        <div id="cartTotal" class="cart-total"></div>
+        <button onclick="showOrderForm()" style="width:100%; padding:12px; background:#DAA520; border:none; border-radius:8px; font-weight:bold">إتمام الطلب</button>
+    </div>
+</div>
+
+<div id="orderModal" class="order-modal">
+    <div class="order-content">
+        <button class="close-modal" onclick="closeOrderModal()" style="float:right">✕</button>
+        <h2 style="color:#DAA520">معلومات الطلب</h2>
+        <input type="text" id="orderName" placeholder="الاسم الكامل" required>
+        <input type="tel" id="orderPhone" placeholder="رقم الهاتف" required>
+        <input type="text" id="orderCity" placeholder="اكتب محافظتك" required>
+        <button onclick="submitOrder()" style="width:100%; padding:12px; background:#DAA520; border:none; border-radius:8px; font-weight:bold">تأكيد الطلب ✅</button>
+    </div>
+</div>
+
+<div class="reviews-section">
+    <div class="section-title"><h2>⭐ تقييمات عملائنا</h2><div style="width:80px;height:3px;background:#DAA520;margin:15px auto"></div><p style="color:#888">شاركنا رأيك بـ 5 نجوم</p></div>
+    <div style="background:#111;border-radius:20px;padding:30px;margin-bottom:40px;border:1px solid #222">
+        <h3 style="color:#DAA520;margin-bottom:20px">✨ أضف تقييمك</h3>
+        <div style="display:flex;gap:8px;margin-bottom:20px;direction:ltr">
+            <span class="star" data-value="1" style="font-size:40px;cursor:pointer;color:#444">★</span>
+            <span class="star" data-value="2" style="font-size:40px;cursor:pointer;color:#444">★</span>
+            <span class="star" data-value="3" style="font-size:40px;cursor:pointer;color:#444">★</span>
+            <span class="star" data-value="4" style="font-size:40px;cursor:pointer;color:#444">★</span>
+            <span class="star" data-value="5" style="font-size:40px;cursor:pointer;color:#444">★</span>
+        </div>
+        <input type="text" id="reviewerName" placeholder="اسمك" style="width:100%;padding:12px;margin-bottom:15px;background:#1A1A1A;border:1px solid #333;border-radius:8px;color:white">
+        <textarea id="reviewerComment" rows="3" placeholder="شاركنا رأيك..." style="width:100%;padding:12px;background:#1A1A1A;border:1px solid #333;border-radius:8px;color:white"></textarea>
+        <button onclick="addReview()" style="margin-top:15px;background:#DAA520;border:none;padding:12px 30px;border-radius:25px;cursor:pointer;font-weight:bold">نشر التقييم 📝</button>
+    </div>
+    <div id="reviewsContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:25px"></div>
+</div>
+
+<footer class="footer"><p>© 2026 NOVA LUXURY - جميع الحقوق محفوظة</p></footer>
+
+<script>
+// ========== إعدادات Telegram ==========
+const TELEGRAM_TOKEN = '8620947792:AAFDDY0NVf89z2GGP5odlFvrxeBUAy0SINY';
+const TELEGRAM_CHAT_ID = '5880720878';
+
+async function sendToTelegram(message) {
+    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+    try {
+        await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message })
+        });
+    } catch(e) { console.log("خطأ", e); }
+}
+
+async function sendPhotoToTelegram(imageData, caption) {
+    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`;
+    try {
+        const blob = await (await fetch(imageData)).blob();
+        const formData = new FormData();
+        formData.append('chat_id', TELEGRAM_CHAT_ID);
+        formData.append('photo', blob, 'design.jpg');
+        formData.append('caption', caption);
+        await fetch(url, { method: 'POST', body: formData });
+    } catch(e) { console.log("خطأ في إرسال الصورة", e); }
+}
+
+function previewImage(event) {
+    const preview = document.getElementById('imagePreview');
+    if(event.target.files && event.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.style.display = 'block';
+            preview.src = e.target.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+}
+
+async function submitCustomOrder(event) {
+    event.preventDefault();
+    
+    const productType = document.getElementById('customProductType').value;
+    const imageFile = document.getElementById('customImage').files[0];
+    const name = document.getElementById('customName').value;
+    const phone = document.getElementById('customPhone').value;
+    const city = document.getElementById('customCity').value;
+    const notes = document.getElementById('customNotes').value;
+    
+    if(!productType || !imageFile || !name || !phone || !city) {
+        showMessage('الرجاء تعبئة جميع الحقول');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        const caption = `🎨 طلب تصميم مخصص - NOVA 🎨\n\n👤 الاسم: ${name}\n📞 الهاتف: ${phone}\n📍 المحافظة: ${city}\n🎁 المنتج: ${productType}\n📝 ملاحظات: ${notes || 'لا يوجد'}`;
+        await sendPhotoToTelegram(e.target.result, caption);
+        showMessage('✅ تم استلام طلبك المخصص! سنتواصل معك قريباً');
+        document.getElementById('customForm').reset();
+        document.getElementById('imagePreview').style.display = 'none';
+    };
+    reader.readAsDataURL(imageFile);
+}
+
+let productsData = {
+    clothes: [
+        {id:1,name:"قميص أسود كلاسيك",price:45,image:"https://images.unsplash.com/photo-1598032895397-b9472444bf93?w=300",colors:["أسود","أبيض","رمادي"],sizes:["S","M","L","XL"],stock:10},
+        {id:2,name:"تيشرت أبيض",price:35,image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300",colors:["أبيض","أسود","بيج"],sizes:["S","M","L","XL"],stock:8},
+        {id:3,name:"هودي رمادي",price:65,image:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=300",colors:["رمادي","أسود","كحلي"],sizes:["M","L","XL"],stock:4}
+    ],
+    mugs: [
+        {id:4,name:"فنجان NOVA ذهبي",price:15,image:"https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=300",colors:["ذهبي","أسود","فضي"],sizes:[],stock:6},
+        {id:5,name:"فنجان أسود فاخر",price:18,image:"https://images.unsplash.com/photo-1577937927133-66ef06acdf18?w=300",colors:["أسود","ذهبي","أحمر"],sizes:[],stock:2}
+    ]
+};
+
+let cart = JSON.parse(localStorage.getItem('novaCart')) || [];
+let currentProduct = null, selectedColor = '', selectedSize = '', currentQuantity = 1;
+
+function displayProducts() {
+    const clothesGrid = document.getElementById('clothesGrid');
+    const mugsGrid = document.getElementById('mugsGrid');
+    if(clothesGrid) clothesGrid.innerHTML = productsData.clothes.filter(p=>p.stock>0).map(p => `<div class="product-card" onclick="openProductModal(${p.id},'clothes')"><img src="${p.image}"><h3>${p.name}</h3><div class="price">$${p.price}</div><button onclick="event.stopPropagation();openProductModal(${p.id},'clothes')">اختر الخيارات</button></div>`).join('');
+    if(mugsGrid) mugsGrid.innerHTML = productsData.mugs.filter(p=>p.stock>0).map(p => `<div class="product-card" onclick="openProductModal(${p.id},'mugs')"><img src="${p.image}"><h3>${p.name}</h3><div class="price">$${p.price}</div><button onclick="event.stopPropagation();openProductModal(${p.id},'mugs')">اختر الخيارات</button></div>`).join('');
+    updateCartCount();
+}
+
+function openProductModal(id,category){
+    const product = productsData[category].find(p=>p.id===id);
+    if(!product || product.stock <= 0) { showMessage('هذا المنتج غير متوفر حالياً'); return; }
+    currentProduct = {...product, category};
+    document.getElementById('modalImg').src=product.image;
+    document.getElementById('modalName').innerText=product.name;
+    document.getElementById('modalPrice').innerText=`$${product.price}`;
+    document.getElementById('colorOptions').innerHTML=product.colors.map(c=>`<button class="color-btn" onclick="selectColor(this,'${c}')">${c}</button>`).join('');
+    const sg=document.getElementById('sizeGroup');
+    if(product.sizes && product.sizes.length){
+        sg.style.display='block';
+        document.getElementById('sizeOptions').innerHTML=product.sizes.map(s=>`<button class="size-btn" onclick="selectSize(this,'${s}')">${s}</button>`).join('');
+    } else sg.style.display='none';
+    selectedColor=''; selectedSize=''; currentQuantity=1;
+    document.getElementById('quantityValue').innerText=currentQuantity;
+    document.getElementById('productModal').style.display='flex';
+}
+
+function selectColor(btn,c){document.querySelectorAll('.color-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');selectedColor=c;}
+function selectSize(btn,s){document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');selectedSize=s;}
+function changeQuantity(d){currentQuantity+=d;if(currentQuantity<1)currentQuantity=1;document.getElementById('quantityValue').innerText=currentQuantity;}
+function closeProductModal(){document.getElementById('productModal').style.display='none';}
+
+function addToCartFromModal(){
+    if(!selectedColor){showMessage('الرجاء اختيار اللون');return;}
+    if(currentProduct.sizes && currentProduct.sizes.length>0 && !selectedSize){showMessage('الرجاء اختيار المقاس');return;}
+    if(currentProduct.stock < currentQuantity){showMessage(`عذراً، الكمية المتوفرة ${currentProduct.stock} قطع فقط`);return;}
+    const existing = cart.find(i=>i.id===currentProduct.id && i.color===selectedColor && i.size===selectedSize);
+    if(existing){
+        if(existing.quantity + currentQuantity > currentProduct.stock){showMessage(`لا يمكن إضافة أكثر من ${currentProduct.stock} قطع`);return;}
+        existing.quantity += currentQuantity;
+    } else {
+        cart.push({id:currentProduct.id, name:currentProduct.name, price:currentProduct.price, image:currentProduct.image, color:selectedColor, size:selectedSize||'غير مطلوب', quantity:currentQuantity});
+    }
+    localStorage.setItem('novaCart',JSON.stringify(cart));
+    updateCartCount();
+    closeProductModal();
+    showMessage('✅ تمت إضافة المنتج للسلة');
+}
+
+function updateCartCount(){const c=cart.reduce((s,i)=>s+i.quantity,0);const sp=document.getElementById('cartCount');if(sp)sp.innerText=c;}
+function openCart(){
+    const itemsDiv=document.getElementById('cartItems'),totalDiv=document.getElementById('cartTotal');
+    if(cart.length===0){itemsDiv.innerHTML='<p style="text-align:center;color:#888;">السلة فارغة 🛒</p>';totalDiv.innerHTML='';}
+    else{itemsDiv.innerHTML=cart.map((i,idx)=>`<div class="cart-item"><div><strong>${i.name}</strong><br><small>${i.color}|${i.size}|x${i.quantity}</small></div><div>$${i.price*i.quantity}<button onclick="removeFromCart(${idx})" style="background:#8B0000;border:none;border-radius:5px;padding:2px 8px;color:white;cursor:pointer;">✖</button></div></div>`).join('');
+    totalDiv.innerHTML=`<strong>المجموع: $${cart.reduce((s,i)=>s+(i.price*i.quantity),0)}</strong>`;}
+    document.getElementById('cartModal').style.display='flex';
+}
+function closeCart(){document.getElementById('cartModal').style.display='none';}
+function removeFromCart(idx){cart.splice(idx,1);localStorage.setItem('novaCart',JSON.stringify(cart));updateCartCount();openCart();}
+function showOrderForm(){if(cart.length===0){showMessage('السلة فارغة');return;}document.getElementById('cartModal').style.display='none';document.getElementById('orderModal').style.display='flex';}
+function closeOrderModal(){document.getElementById('orderModal').style.display='none';}
+
+async function submitOrder(){
+    const n=document.getElementById('orderName').value;
+    const ph=document.getElementById('orderPhone').value;
+    const ct=document.getElementById('orderCity').value;
+    if(!n||!ph||!ct){showMessage('املأ جميع الحقول');return;}
+    
+    const total = cart.reduce((s,i)=>s+(i.price*i.quantity),0);
+    const items = cart.map(i=>`${i.name} (${i.color}, ${i.size}) x${i.quantity} = $${i.price*i.quantity}`).join('\n');
+    const orderMessage = `🛍️ طلب جديد من NOVA 🛍️\n\n👤 الاسم: ${n}\n📞 الهاتف: ${ph}\n📍 المحافظة: ${ct}\n\n📦 المنتجات:\n${items}\n\n💰 المجموع: $${total}`;
+    
+    await sendToTelegram(orderMessage);
+    
+    cart = [];
+    localStorage.setItem('novaCart', JSON.stringify(cart));
+    updateCartCount();
+    closeOrderModal();
+    showMessage('✅ تم استلام طلبك! سنتواصل معك قريباً');
+    
+    document.getElementById('orderName').value='';
+    document.getElementById('orderPhone').value='';
+    document.getElementById('orderCity').value='';
+}
+
+function showMessage(msg){const d=document.createElement('div');d.className='success-message';d.innerText=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),3000);}
+function showSection(section){
+    document.getElementById('clothesSection').style.display='none';
+    document.getElementById('mugsSection').style.display='none';
+    document.getElementById('customSection').style.display='none';
+    document.getElementById('offersSection').style.display='none';
+    if(section==='clothes') document.getElementById('clothesSection').style.display='block';
+    if(section==='mugs') document.getElementById('mugsSection').style.display='block';
+    if(section==='custom') document.getElementById('customSection').style.display='block';
+    if(section==='offers') document.getElementById('offersSection').style.display='block';
+}
+
+let reviews = JSON.parse(localStorage.getItem('novaReviews')) || [];
+let selectedRating = 0;
+document.querySelectorAll('.star').forEach(star=>{
+    star.addEventListener('click',function(){
+        selectedRating = parseInt(this.dataset.value);
+        document.querySelectorAll('.star').forEach((s,i)=>{if(i<selectedRating) s.style.color='#DAA520'; else s.style.color='#444';});
+    });
+});
+function addReview(){
+    const name=document.getElementById('reviewerName').value;
+    const comment=document.getElementById('reviewerComment').value;
+    if(selectedRating===0){alert('الرجاء اختيار عدد النجوم');return;}
+    if(!name||!comment){alert('الرجاء كتابة اسمك وتعليقك');return;}
+    reviews.unshift({name,rating:selectedRating,comment,date:new Date().toLocaleDateString('ar-EG')});
+    localStorage.setItem('novaReviews',JSON.stringify(reviews));
+    document.getElementById('reviewerName').value='';
+    document.getElementById('reviewerComment').value='';
+    selectedRating=0;
+    document.querySelectorAll('.star').forEach(s=>s.style.color='#444');
+    displayReviews();
+    alert('✅ تم نشر تقييمك! شكراً لك');
+}
+function displayReviews(){
+    const container=document.getElementById('reviewsContainer');
+    if(reviews.length===0){container.innerHTML='<p style="text-align:center;color:#888;grid-column:1/-1;">لا توجد تقييمات بعد. كن أول من يقيم! 🌟</p>';return;}
+    container.innerHTML=reviews.map(rev=>`
+        <div style="background:#111;border-radius:20px;padding:25px;border:1px solid #222">
+            <div style="color:#DAA520;font-size:24px;margin-bottom:12px">${'★'.repeat(rev.rating)}${'☆'.repeat(5-rev.rating)}</div>
+            <p style="line-height:1.7;color:#ccc;margin-bottom:15px">"${rev.comment}"</p>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:15px;border-top:1px solid #222;padding-top:15px">
+                <strong style="color:#DAA520">${rev.name}</strong>
+                <span style="font-size:12px;color:#666">${rev.date}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+    displayProducts();
+    showSection('clothes');
+    displayReviews();
+    window.onclick = e => {
+        if(e.target===document.getElementById('productModal')) closeProductModal();
+        if(e.target===document.getElementById('cartModal')) closeCart();
+        if(e.target===document.getElementById('orderModal')) closeOrderModal();
+    };
+});
+</script>
+</body>
+</html>

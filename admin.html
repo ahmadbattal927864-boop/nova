@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOVA | لوحة التحكم - إدارة المخزون والطلبات المخصصة</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Cairo',sans-serif;background:#0A0A0A;color:#F5F5F5}
+        .login-container{min-height:100vh;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#0A0A0A,#1A1A1A)}
+        .login-box{background:#111;padding:40px;border-radius:20px;border:1px solid #DAA520;text-align:center;width:350px}
+        .login-box input{width:100%;padding:12px;margin:10px 0;background:#1A1A1A;border:1px solid #333;border-radius:8px;color:white}
+        .login-box button{width:100%;padding:12px;background:#DAA520;border:none;border-radius:8px;font-weight:bold;cursor:pointer}
+        .admin-panel{display:none}
+        .navbar{background:#0A0A0A;padding:15px 30px;display:flex;justify-content:space-between;border-bottom:1px solid #DAA520;flex-wrap:wrap}
+        .navbar h3{color:#DAA520}
+        .navbar button{background:#DAA520;border:none;padding:8px 20px;border-radius:20px;cursor:pointer}
+        .tabs{display:flex;gap:20px;padding:20px 30px;background:#0A0A0A;border-bottom:1px solid #222;flex-wrap:wrap}
+        .tabs button{background:#1A1A1A;border:none;padding:10px 25px;border-radius:25px;cursor:pointer;color:white}
+        .tabs button.active{background:#DAA520;color:#0A0A0A}
+        .section{display:none;padding:30px}
+        .section.active{display:block}
+        .card{background:#111;border-radius:15px;padding:20px;margin-bottom:20px;border:1px solid #222}
+        .card h3{color:#DAA520;margin-bottom:15px}
+        .product-item,.order-item,.custom-item{background:#1A1A1A;padding:15px;margin:10px 0;border-radius:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+        .low-stock{background:#3D2A0A}
+        .stock-badge{padding:3px 10px;border-radius:20px;font-size:12px}
+        .stock-high{background:#1A5A1A;color:#90EE90}
+        .stock-medium{background:#8B6B0A;color:#FFD700}
+        .stock-low{background:#8B0000;color:#FF9999}
+        .delete-btn{background:#8B0000;border:none;padding:5px 15px;border-radius:8px;cursor:pointer;color:white}
+        .edit-stock{background:#DAA520;border:none;padding:5px 12px;border-radius:8px;cursor:pointer}
+        .add-form{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+        .add-form input,.add-form select{padding:10px;background:#1A1A1A;border:1px solid #333;border-radius:8px;color:white;flex:1}
+        .add-form button{background:#DAA520;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:bold}
+        .custom-image{width:80px;height:80px;object-fit:cover;border-radius:10px;margin-right:15px}
+        .order-number{background:#DAA520;color:#0A0A0A;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:bold;display:inline-block}
+        .download-btn{background:#2196F3;border:none;padding:5px 12px;border-radius:8px;cursor:pointer;color:white;margin-left:5px}
+        @media(max-width:768px){.product-item,.order-item,.custom-item{flex-direction:column;text-align:center}}
+    </style>
+</head>
+<body>
+<div id="loginSection" class="login-container">
+    <div class="login-box">
+        <h2>🔐 لوحة تحكم NOVA</h2>
+        <input type="password" id="adminPassword" placeholder="كلمة المرور">
+        <button onclick="checkLogin()">دخول</button>
+    </div>
+</div>
+
+<div id="adminPanel" class="admin-panel">
+    <div class="navbar">
+        <h3>✨ NOVA LUXURY - ADMIN</h3>
+        <button onclick="logout()">🚪 خروج</button>
+    </div>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('products')">📦 المنتجات</button>
+        <button class="tab-btn" onclick="showTab('orders')">📋 الطلبات العادية</button>
+        <button class="tab-btn" onclick="showTab('custom')">🎨 الطلبات المخصصة</button>
+        <button class="tab-btn" onclick="showTab('inventory')">📊 المخزون</button>
+    </div>
+
+    <div id="productsSection" class="section active">
+        <div class="card">
+            <h3>➕ إضافة منتج جديد</h3>
+            <div class="add-form">
+                <input type="text" id="newName" placeholder="اسم المنتج">
+                <input type="number" id="newPrice" placeholder="السعر">
+                <input type="text" id="newImage" placeholder="رابط الصورة">
+                <input type="number" id="newStock" placeholder="الكمية" value="10">
+                <select id="newCategory"><option value="clothes">ملابس</option><option value="mugs">فناجين</option></select>
+                <button onclick="addProduct()">إضافة</button>
+            </div>
+        </div>
+        <div class="card"><h3>📋 المنتجات</h3><div id="productsList"></div></div>
+    </div>
+
+    <div id="ordersSection" class="section">
+        <div class="card"><h3>📋 الطلبات العادية</h3><div id="ordersList"></div></div>
+    </div>
+
+    <div id="customSection" class="section">
+        <div class="card">
+            <h3>🎨 الطلبات المخصصة (مع أرقام الطلبات والصورة)</h3>
+            <div id="customList"></div>
+        </div>
+    </div>
+
+    <div id="inventorySection" class="section">
+        <div class="card"><h3>📊 تقرير المخزون</h3><div id="inventoryReport"></div></div>
+    </div>
+</div>
+
+<script>
+const ADMIN_PASSWORD = '927864ahmad';
+
+function checkLogin() {
+    if(document.getElementById('adminPassword').value === ADMIN_PASSWORD){
+        localStorage.setItem('novaAdmin','true');
+        document.getElementById('loginSection').style.display='none';
+        document.getElementById('adminPanel').style.display='block';
+        loadAll();
+    } else alert('كلمة المرور خطأ');
+}
+function logout(){localStorage.removeItem('novaAdmin');location.reload();}
+function showTab(tab){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(tab+'Section').classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+let productsData = {};
+
+function loadAll(){
+    loadProducts();
+    loadOrders();
+    loadCustomOrders();
+    loadInventory();
+}
+
+function loadProducts(){
+    let stored = localStorage.getItem('novaProducts');
+    if(!stored){
+        productsData = {
+            clothes: [{id:1,name:"قميص أسود كلاسيك",price:45,image:"https://images.unsplash.com/photo-1598032895397-b9472444bf93?w=300",colors:["أسود","أبيض","رمادي"],sizes:["S","M","L","XL"],stock:10}],
+            mugs: [{id:2,name:"فنجان NOVA ذهبي",price:15,image:"https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=300",colors:["ذهبي","أسود","فضي"],sizes:[],stock:5}]
+        };
+        localStorage.setItem('novaProducts',JSON.stringify(productsData));
+    } else productsData = JSON.parse(stored);
+    
+    const all = [...productsData.clothes.map(p=>({...p,category:'clothes'})), ...productsData.mugs.map(p=>({...p,category:'mugs'}))];
+    document.getElementById('productsList').innerHTML = all.map(p=>`
+        <div class="product-item ${p.stock<3?'low-stock':''}">
+            <div><strong>${p.name}</strong> - $${p.price} | المخزون: ${p.stock}</div>
+            <div><button class="edit-stock" onclick="editStock(${p.id},'${p.category}')">✏️ تعديل</button>
+            <button class="delete-btn" onclick="deleteProduct(${p.id},'${p.category}')">🗑️ حذف</button></div>
+        </div>
+    `).join('');
+}
+
+function editStock(id,category){
+    let newStock = prompt('الكمية الجديدة:');
+    if(newStock && !isNaN(newStock)){
+        let product = productsData[category].find(p=>p.id===id);
+        if(product) product.stock = parseInt(newStock);
+        localStorage.setItem('novaProducts',JSON.stringify(productsData));
+        loadProducts();
+    }
+}
+function deleteProduct(id,category){
+    if(confirm('حذف المنتج؟')){
+        productsData[category] = productsData[category].filter(p=>p.id!==id);
+        localStorage.setItem('novaProducts',JSON.stringify(productsData));
+        loadProducts();
+    }
+}
+function addProduct(){
+    let name = document.getElementById('newName').value;
+    let price = document.getElementById('newPrice').value;
+    let image = document.getElementById('newImage').value;
+    let stock = document.getElementById('newStock').value;
+    let category = document.getElementById('newCategory').value;
+    if(!name||!price||!image) return alert('املأ الحقول');
+    let newId = Date.now();
+    productsData[category].push({id:newId,name,price:parseFloat(price),image,colors:["أسود","أبيض"],sizes:category==='clothes'?["S","M","L"]:[],stock:parseInt(stock)});
+    localStorage.setItem('novaProducts',JSON.stringify(productsData));
+    loadProducts();
+    alert('✅ تمت الإضافة');
+}
+
+function loadOrders(){
+    let orders = JSON.parse(localStorage.getItem('novaOrders')) || [];
+    let container = document.getElementById('ordersList');
+    if(orders.length===0){container.innerHTML='<p>لا توجد طلبات</p>';return;}
+    container.innerHTML = orders.slice().reverse().map((o,i)=>`
+        <div class="order-item">
+            <div><span class="order-number">#${orders.length-i}</span><br>
+            <strong>${o.name}</strong><br>📞 ${o.phone}<br>📍 ${o.city}<br>📦 ${o.cart.map(c=>c.name).join(', ')}<br>💰 $${o.total}<br>📅 ${o.date}</div>
+            <button class="delete-btn" onclick="deleteOrder('${o.date}')">🗑️</button>
+        </div>
+    `).join('');
+}
+function deleteOrder(date){
+    let orders = JSON.parse(localStorage.getItem('novaOrders')) || [];
+    orders = orders.filter(o=>o.date!==date);
+    localStorage.setItem('novaOrders',JSON.stringify(orders));
+    loadOrders();
+}
+
+// ========== الطلبات المخصصة مع أرقام وصور ==========
+function loadCustomOrders(){
+    let orders = JSON.parse(localStorage.getItem('novaCustomOrders')) || [];
+    let container = document.getElementById('customList');
+    if(orders.length===0){container.innerHTML='<p>لا توجد طلبات مخصصة</p>';return;}
+    container.innerHTML = orders.slice().reverse().map((o,idx)=>{
+        let orderNum = orders.length - idx;
+        return `
+        <div class="custom-item">
+            <div>
+                <span class="order-number">🔢 #${orderNum}</span><br>
+                <strong>${o.name}</strong><br>
+                📞 ${o.phone}<br>
+                📍 ${o.city}<br>
+                🎁 ${o.productType}<br>
+                📝 ${o.notes || 'لا توجد ملاحظات'}<br>
+                📅 ${o.date}<br>
+                ${o.image ? `<img src="${o.image}" class="custom-image" onclick="window.open(this.src)">` : ''}
+            </div>
+            <div>
+                ${o.image ? `<button class="download-btn" onclick="downloadImage('${o.image}', '${orderNum}')">📥 تحميل الصورة</button><br>` : ''}
+                <button class="delete-btn" onclick="deleteCustomOrder('${o.date}')">🗑️ حذف</button>
+            </div>
+        </div>
+    `}).join('');
+}
+
+function downloadImage(imageData, orderNum){
+    const link = document.createElement('a');
+    link.href = imageData;
+    link.download = `custom_order_${orderNum}.jpg`;
+    link.click();
+}
+
+function deleteCustomOrder(date){
+    let orders = JSON.parse(localStorage.getItem('novaCustomOrders')) || [];
+    orders = orders.filter(o=>o.date!==date);
+    localStorage.setItem('novaCustomOrders',JSON.stringify(orders));
+    loadCustomOrders();
+}
+
+function loadInventory(){
+    let all = [...productsData.clothes, ...productsData.mugs];
+    let totalStock = all.reduce((s,p)=>s+p.stock,0);
+    let lowStock = all.filter(p=>p.stock>0 && p.stock<5).length;
+    let outStock = all.filter(p=>p.stock===0).length;
+    document.getElementById('inventoryReport').innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:20px">
+            <div style="background:#1A1A1A;padding:15px;border-radius:10px;text-align:center"><h4>📦 إجمالي المنتجات</h4><h2>${all.length}</h2></div>
+            <div style="background:#1A1A1A;padding:15px;border-radius:10px;text-align:center"><h4>📊 إجمالي القطع</h4><h2>${totalStock}</h2></div>
+            <div style="background:#3D2A0A;padding:15px;border-radius:10px;text-align:center"><h4>⚠️ منخفض</h4><h2>${lowStock}</h2></div>
+        </div>
+        <table style="width:100%;border-collapse:collapse">${all.map(p=>`<tr style="border-bottom:1px solid #222"><td>${p.name}</td><td>$${p.price}</td><td>${p.stock}</td><tr>`).join('')}</table>
+    `;
+}
+
+if(localStorage.getItem('novaAdmin')==='true'){
+    document.getElementById('loginSection').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+    loadAll();
+}
+</script>
+</body>
+</html>
